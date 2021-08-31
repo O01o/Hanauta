@@ -1,0 +1,257 @@
+<MenuScreen>:
+    id: menu
+
+    BoxLayout:
+        orientation: 'vertical'
+        
+        Label:
+            size_hint_y: 1.75
+            font_size: 60
+            font_name: 'ipamp.ttf'
+            text: "Welcome to 花唄"    
+
+        BoxLayout:
+            Button:
+                font_name: 'ipamp.ttf'
+                text: '録音する'
+                on_press: root.manager.current = 'recording'
+            
+            Button:
+                font_name: 'ipamp.ttf'
+                text: '録音ファイル'
+                on_press: root.manager.current = 'wav_list'
+            
+            Button:
+                font_name: 'ipamp.ttf'
+                text: 'MIDIファイル'
+                on_press: root.manager.current = 'midi_list'
+            Button:
+                font_name: 'ipamp.ttf'
+                text: '帰る'
+                on_press: app.quit()
+
+
+<RecordingScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            size_hint_y: 1.75
+            orientation: 'vertical'
+
+            Label:
+                font_name: 'ipamp.ttf'
+                font_size: 24
+                text: 'ここで自分の声を録音できます。'
+
+            BoxLayout:
+                size_hint_y: 1
+
+        BoxLayout:
+            Button:
+                size_hint_x: 0.5
+                font_name: 'ipamp.ttf'
+                text: 'メニューに戻る'
+                on_press: root.manager.current = 'menu'
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: root.text
+                background_color: root.color
+                on_press: root.onClickRecordingButton()
+
+
+<WavListScreen>:
+    id: wavlist
+    
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            size_hint_y: 1.75
+            font_name: 'ipamp.ttf'
+            font_size: 24
+            text: 'WAVファイルを選択してMIDIファイルに変換できます。'
+        
+        BoxLayout:
+            id: audio
+            source: ""
+
+            Label:
+                id: audio_label
+                text: root.filetext
+
+            Button:
+                id: play_button
+                text: root.playtext
+                on_press: root.onClickPlayButton()
+                background_color: root.color
+                
+        FileChooserIconView:
+            id: filechooser
+            on_selection: wavlist.selected(filechooser.selection)
+            path: 'wavfiles'
+        
+        BoxLayout:
+            Button:
+                size_hint_x: 0.5
+                font_name: 'ipamp.ttf'
+                text: 'メニューに戻る'
+                on_press: root.manager.current = 'menu'
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: '選択したWAVファイルをMIDIに変換する'
+                on_press: if root.sound: root.manager.current = 'wav2midi'
+
+
+<MidiListScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            size_hint_y: 1.75
+            font_name: 'ipamp.ttf'
+            font_size: 24
+            text: 'MIDIファイルはGoogleドライブにも保存されています。'
+        
+        BoxLayout:
+            Button:
+                size_hint_x: 0.5
+                font_name: 'ipamp.ttf'
+                text: 'メニューに戻る'
+                on_press: root.manager.current = 'menu'
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: 'ファイルを選択する'
+                on_press: pass
+
+
+<Wav2MidiScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            id: recording
+            size_hint_y: 2
+            font_name: 'ipamp.ttf'
+            font_size: 24
+            text: 'オプションを設定してください。'
+        
+        BoxLayout:
+            size_hint_y: 5
+
+            FloatLayout:
+                size_hint_x: 0.33
+                canvas:
+                    Rectangle:
+                        source: "flower3.5.png"
+                        pos: self.pos
+                        size: self.size
+                
+            BoxLayout:
+                orientation: 'vertical'
+
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'ヴェロシティ'
+                    TextInput:
+                        id: velosity
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'テンポ'
+                    TextInput:
+                        id: tempo
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'ディビジョン'
+                    TextInput:
+                        id: division
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+                
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'サンプリングレート'
+                    TextInput:
+                        id: sample_rate
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+                
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'ビット深度'
+                    TextInput:
+                        id: bit_depth
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+                
+                BoxLayout:
+                    Label:
+                        font_name: 'ipamp.ttf'
+                        text: 'クロック遅延'
+                    TextInput:
+                        id: clock_delay
+                        size: 200, 30
+                        pos: 50, 70
+                        line_height: 1
+                        multiline: False
+                        hint_text: 'test'
+
+            FloatLayout:
+                size_hint_x: 0.33
+                canvas:
+                    Color: 
+                        rgba: 1, 1, 1, 1
+                    Rectangle:
+                        source: "flower3.5.png"
+                        pos: self.pos
+                        size: self.size
+        
+        BoxLayout:
+            size_hint_y: 0.5
+        
+        BoxLayout:
+            size_hint_y: 1.75
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: 'メニューに戻る'
+                on_press: root.manager.current = 'menu'
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: 'テスト再生'
+                on_press: pass
+
+            Button:
+                font_name: 'ipamp.ttf'
+                text: 'WAV→MIDI変換する'
+                on_press: pass
