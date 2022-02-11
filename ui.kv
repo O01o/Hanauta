@@ -66,32 +66,61 @@
     
     BoxLayout:
         orientation: 'vertical'
+                
+        FileChooserIconView:
+            id: filechooser
+            on_selection: wavlist.selected(filechooser.selection)
+            path: 'wavfiles'
+            size_hint_y: 5.0
+        
 
         Label:
-            size_hint_y: 1.75
-            font_name: 'ipamp.ttf'
-            font_size: 24
-            text: 'WAVファイルを選択してMIDIファイルに変換できます。'
-        
+            id: audio_label
+            text: root.filetext
+            size_hint_y: 0.5
+
+
         BoxLayout:
             id: audio
             source: ""
-
-            Label:
-                id: audio_label
-                text: root.filetext
 
             Button:
                 id: play_button
                 text: root.playtext
                 on_press: root.onClickPlayButton()
                 background_color: root.color
-                
-        FileChooserIconView:
-            id: filechooser
-            on_selection: wavlist.selected(filechooser.selection)
-            path: 'wavfiles'
+
         
+        BoxLayout: 
+            Label:
+                text: 'Freq'
+
+            Button:
+                text: '-10'
+                on_press: root.freq -= 10
+            
+            Button:
+                text: '-1'
+                on_press: root.freq -= 1
+            
+            Label:
+                text: str(root.freq)
+            
+            Button:
+                text: '+1'
+                on_press: root.freq += 1
+            
+            Button:
+                text: '+10'
+                on_press: root.freq += 10
+
+            Button:
+                text: 'Clock'
+                on_press: root.onClickClockButton()
+                background_color: root.color2
+            
+        
+
         BoxLayout:
             Button:
                 size_hint_x: 0.5
@@ -101,8 +130,8 @@
 
             Button:
                 font_name: 'ipamp.ttf'
-                text: '選択したWAVファイルをMIDIに変換する'
-                on_press: if root.sound: root.manager.current = 'wav2midi'
+                text: 'Convert!!!'
+                on_press: if root.sound: root.onClickConvertButton()
 
 
 <MidiListScreen>:

@@ -11,9 +11,13 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty
-from kivy.properties import StringProperty, ListProperty
+from kivy.properties import StringProperty, ListProperty, NumericProperty, BooleanProperty
 from kivy.factory import Factory
 from kivy.uix.popup import Popup
+
+from kivy.clock import Clock
+
+from kivy.core.window import Window
 
 from kivy.config import Config
 from kivy.utils import DEPRECATED_CALLERS
@@ -34,6 +38,12 @@ import wave
 import sys
 sys.path
 
+import librosa
+
+import mido
+from mido import Message, MidiFile, MidiTrack, MetaMessage
+
+
 # Audio Recording Init Instance
 # --------------------------------------------------------
 audio = pyaudio.PyAudio()
@@ -46,6 +56,8 @@ if not os.path.isdir(filepath_wav):
 
 FILE_NAME = './test.wav'  # 保存するファイル名
 sample_rate = 44100  # サンプリング周波数
+
+Window.size = [360,640]
 
 # --------------------------------------------------------
 
@@ -113,16 +125,24 @@ class RecordingScreen(Screen):
 
 class WavListScreen(Screen):
     flag = True
+    flag2 = True
     filetext = StringProperty()
     playtext = StringProperty()
+    freq = NumericProperty()
+    disabled = BooleanProperty()
+    
     color = ListProperty([0.5, 0.5, 0.5, 1.0])
+    color2 = ListProperty([0.5, 0.5, 0.5, 1.0])
 
     sound = SoundLoader.load('')
+    tik = SoundLoader.load('clock_cut.wav')
 
     def __init__(self, **kwargs):
         super(WavListScreen, self).__init__(**kwargs)
         self.filetext = 'wavfile?'
         self.playtext = 'play'
+        self.freq = 80
+        self.disabled = False
 
     def selected(self, filename):
         self.sound = SoundLoader.load(filename[0])
@@ -146,6 +166,50 @@ class WavListScreen(Screen):
                 self.sound.stop()
 
         self.flag = not self.flag
+        
+    
+    def tiktak(self, *args):
+        if self.tik:
+            self.tik.play()
+        
+        
+    def onClickClockButton(self):
+        print('PlayToggle Changed to', self.flag,'!')
+
+        if self.flag2 == True:
+            self.color2 = [1.0, 0.3, 0.3, 1.0]
+            self.event = Clock.schedule_interval(self.tiktak, 60/self.freq)
+        else:
+            self.color2 = [0.5, 0.5, 0.5, 1.0]
+            self.event.cancel()
+            
+        # self.disabled = not self.disabled
+        self.flag2 = not self.flag2
+        
+    
+    def onClickConvertButton(self):
+        if self.sound:
+            '''
+            Convert Wave to Chromagram with Librosa
+            '''
+            
+            
+            '''
+            Save Midi with Mido
+            '''
+            mid = MidiFile()
+            track = MidiTrack()
+            mid.tracks.append(track)
+            track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(120)))
+            track.append(Message('note_on', note=64, velocity=127, time=0))
+            track.append(Message('note_off', note=64, time=480))
+
+            mid.save('new_song.mid')
+            
+        else:
+            self.playtext = 'file not found...'
+
+
 
 
 class MidiListScreen(Screen):
