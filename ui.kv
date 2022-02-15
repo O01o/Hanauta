@@ -69,7 +69,7 @@
                 
         FileChooserIconView:
             id: filechooser
-            on_selection: wavlist.selected(filechooser.selection)
+            on_selection: root.selected(filechooser.selection)
             path: 'wavfiles'
             size_hint_y: 5.0
         
@@ -78,7 +78,7 @@
             id: audio_label
             text: root.filetext
             size_hint_y: 0.5
-
+            font_size: 20
 
         BoxLayout:
             id: audio
@@ -94,26 +94,18 @@
         BoxLayout: 
             Label:
                 text: 'Freq'
-
+                size_hint_x: 2
             Button:
-                text: '-10'
-                on_press: root.freq -= 10
-            
-            Button:
-                text: '-1'
-                on_press: root.freq -= 1
+                text: '-'
+                on_press: root.onClickPlusMinusButton(-1)
             
             Label:
-                text: str(root.freq)
+                text: str(round(root.tempo, 2))
             
             Button:
-                text: '+1'
-                on_press: root.freq += 1
+                text: '+'
+                on_press: root.onClickPlusMinusButton(+1)
             
-            Button:
-                text: '+10'
-                on_press: root.freq += 10
-
             Button:
                 text: 'Clock'
                 on_press: root.onClickClockButton()
@@ -123,12 +115,12 @@
 
         BoxLayout:
             Button:
-                size_hint_x: 0.5
                 font_name: 'ipamp.ttf'
                 text: 'メニューに戻る'
                 on_press: root.manager.current = 'menu'
 
             Button:
+                size_hint_x: 2
                 font_name: 'ipamp.ttf'
                 text: 'Convert!!!'
                 on_press: if root.sound: root.onClickConvertButton()

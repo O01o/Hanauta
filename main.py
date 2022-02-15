@@ -38,6 +38,9 @@ import wave
 import sys
 sys.path
 
+import math
+import numpy as np
+import scipy as sp
 import librosa
 
 import mido
@@ -58,6 +61,10 @@ FILE_NAME = './test.wav'  # 保存するファイル名
 sample_rate = 44100  # サンプリング周波数
 
 Window.size = [360,640]
+
+
+SAMPLE_RATE = 8000
+
 
 # --------------------------------------------------------
 
@@ -128,8 +135,11 @@ class WavListScreen(Screen):
     flag2 = True
     filetext = StringProperty()
     playtext = StringProperty()
-    freq = NumericProperty()
+    hop_length = NumericProperty() # 1フレーム出力あたりに必要なサンプル量
     disabled = BooleanProperty()
+    # tempo_list = [30, 36, 40, 45, 50, 60, 72, 75, 90, 100, 120, 125, 150, 180, 200, 225, 300]
+    tempo = NumericProperty() # 音のテンポ
+    tempo_index = NumericProperty(100)
     
     color = ListProperty([0.5, 0.5, 0.5, 1.0])
     color2 = ListProperty([0.5, 0.5, 0.5, 1.0])
@@ -141,12 +151,23 @@ class WavListScreen(Screen):
         super(WavListScreen, self).__init__(**kwargs)
         self.filetext = 'wavfile?'
         self.playtext = 'play'
-        self.freq = 80
+        self.hop_length = 16 * self.tempo_index
+        self.tempo = round(abs(SAMPLE_RATE * 15 / self.hop_length), 2)
         self.disabled = False
+        
+        print(type(self.hop_length))
 
     def selected(self, filename):
-        self.sound = SoundLoader.load(filename[0])
-        self.filetext = filename[0]
+        try:
+            self.sound = SoundLoader.load(filename[0])
+            self.filetext = filename[0]
+        except IndexError:
+            pass
+    
+    def onClickPlusMinusButton(self, num):          
+        self.tempo_index -= num
+        self.hop_length = 16 * self.tempo_index
+        self.tempo = round(abs(SAMPLE_RATE * 15 / self.hop_length), 2)
 
     def onClickPlayButton(self):
         print('PlayToggle Changed to', self.flag,'!')
@@ -178,7 +199,7 @@ class WavListScreen(Screen):
 
         if self.flag2 == True:
             self.color2 = [1.0, 0.3, 0.3, 1.0]
-            self.event = Clock.schedule_interval(self.tiktak, 60/self.freq)
+            self.event = Clock.schedule_interval(self.tiktak, 60/self.tempo)
         else:
             self.color2 = [0.5, 0.5, 0.5, 1.0]
             self.event.cancel()
@@ -192,19 +213,79 @@ class WavListScreen(Screen):
             '''
             Convert Wave to Chromagram with Librosa
             '''
+            # audiofile = wave.open('wavfiles/asano.wav', 'rb')
+            # y, sr = librosa.load('wavfiles/asano.wav', sr=SAMPLE_RATE)
+            audiofile = wave.open(self.filetext, 'rb')
+            y, sr = librosa.load(self.filetext, sr=SAMPLE_RATE)
+            
+            print('fr: ', audiofile.getframerate(), 'sr: ', sr)
+            # hop_length は5オクターブの場合だと16の整数倍である必要があるらしいです！
+            hop_length = self.hop_length # CQTのサンプル数(ここがクロックの速さに応じて可変になる)(デフォルト値は512)(計算方法は紙の計算式にて)           
+            # hop_length = 2048 # CQTのサンプル数(ここがクロックの速さに応じて可変になる)(デフォルト値は512)(計算方法は紙の計算式にて)           
+            fmin = librosa.note_to_hz('C1') # 最低音階
+            bins_per_octave = 12 # 1オクターブ12音階
+            octaves = 5 # オクターブ数
+            n_bins = bins_per_octave * octaves # 音階の個数
+            window = 'hamming' # 窓関数のモデル(今回はハミング窓。ハン窓('hann')や三角窓('triang')もあり
+            print('hop_length: ', hop_length)
+            
+            chroma_cqt = np.abs(librosa.cqt(
+                y, sr=sr, hop_length=hop_length, fmin=fmin, n_bins=n_bins, 
+                bins_per_octave=bins_per_octave, window=window))
+        
+            '''
+            chroma_cqt = np.abs(librosa.cqt(
+                audiofile.readframes, sr=audiofile.getframerate, hop_length=hop_length, fmin=fmin, n_bins=n_bins, 
+                bins_per_octave=bins_per_octave, window=window))
+            '''
+            
+            pitch_list = [] # 各フレームごとの音階
+            midi_list = [] # 音階の長さリスト
+            tmp_pitch = 0 # 一時的に保存する音階
+            count = 1 # 音階の長さ
+            print('loaded soundfile sample rate: ', sr)
+            # print(len(y))
+            # print(len(audiofile.readframes))
+            print(type(chroma_cqt), len(chroma_cqt))
+            chroma_cqt_T = chroma_cqt.T
+            for x in chroma_cqt_T:
+                # フレームごとの音階をリスト化する
+                pitch_list.append(np.argmax(x))
+                
+                # 音階化したリストについて、音階の長さを調べ、
+                # 音階が続けば長さを加え、違う音程になれば出力する
+                if np.argmax(x) == tmp_pitch:
+                    count += 1
+                else:
+                    midi_list.append([tmp_pitch, count])
+                    tmp_pitch = np.argmax(x)
+                    count = 1
+            # 最後の音階を出力する
+            midi_list.append([tmp_pitch, count])
+            # 最初の音階は高さ0なので排外する
+            midi_list.remove(midi_list[0])
+            
+            
+            print('len(pitch_list): ', len(pitch_list))
+            print('pitch_list: ', pitch_list)
+            print('len(midi_list): ', len(midi_list))
+            print('midi_list: ', midi_list)
+            print('Convert Done!!!')
             
             
             '''
             Save Midi with Mido
             '''
+            
             mid = MidiFile()
             track = MidiTrack()
             mid.tracks.append(track)
             track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(120)))
-            track.append(Message('note_on', note=64, velocity=127, time=0))
-            track.append(Message('note_off', note=64, time=480))
+            for note in midi_list:
+                track.append(Message('note_on', note=note[0]+36, velocity=127, time=0))
+                track.append(Message('note_off', note=note[0]+36, time=120*note[1]))
 
-            mid.save('new_song.mid')
+            mid.save(self.filetext+'.mid') # 元の音声ファイル名+.mid
             
         else:
             self.playtext = 'file not found...'
