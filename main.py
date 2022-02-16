@@ -62,7 +62,6 @@ sample_rate = 44100  # サンプリング周波数
 
 Window.size = [360,640]
 
-
 SAMPLE_RATE = 8000
 
 

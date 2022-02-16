@@ -1,2 +1,6 @@
 # Hanauta
-With Kivy, enabling to convert a WAV file to MIDI(SMF) file.
+Kivyを使用して、WavファイルをMIDIファイルに変換します。
+
+## 使用パッケージ
+kivy
+mido
