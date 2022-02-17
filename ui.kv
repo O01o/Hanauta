@@ -42,7 +42,7 @@
             Label:
                 font_name: 'ipamp.ttf'
                 font_size: 24
-                text: 'ここで自分の声を録音できます。'
+                text: 'ここで自分の声を録音できます(未実装)'
 
             BoxLayout:
                 size_hint_y: 1
@@ -93,7 +93,8 @@
         
         BoxLayout: 
             Label:
-                text: 'Freq'
+                text: 'テンポ周波数'
+                font_name: 'ipamp.ttf'
                 size_hint_x: 2
             Button:
                 text: '-'
@@ -107,7 +108,8 @@
                 on_press: root.onClickPlusMinusButton(+1)
             
             Button:
-                text: 'Clock'
+                text: 'クロック'
+                font_name: 'ipamp.ttf'
                 on_press: root.onClickClockButton()
                 background_color: root.color2
             
@@ -122,7 +124,8 @@
             Button:
                 size_hint_x: 2
                 font_name: 'ipamp.ttf'
-                text: 'Convert!!!'
+                text: root.converttext
+                background_color: root.color3
                 on_press: if root.sound: root.onClickConvertButton()
 
 
@@ -134,7 +137,7 @@
             size_hint_y: 1.75
             font_name: 'ipamp.ttf'
             font_size: 24
-            text: 'MIDIファイルはGoogleドライブにも保存されています。'
+            text: 'MIDIを再生する機能です(未実装)'
         
         BoxLayout:
             Button:
@@ -148,131 +151,3 @@
                 text: 'ファイルを選択する'
                 on_press: pass
 
-
-<Wav2MidiScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-
-        Label:
-            id: recording
-            size_hint_y: 2
-            font_name: 'ipamp.ttf'
-            font_size: 24
-            text: 'オプションを設定してください。'
-        
-        BoxLayout:
-            size_hint_y: 5
-
-            FloatLayout:
-                size_hint_x: 0.33
-                canvas:
-                    Rectangle:
-                        source: "flower3.5.png"
-                        pos: self.pos
-                        size: self.size
-                
-            BoxLayout:
-                orientation: 'vertical'
-
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'ヴェロシティ'
-                    TextInput:
-                        id: velosity
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'テンポ'
-                    TextInput:
-                        id: tempo
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'ディビジョン'
-                    TextInput:
-                        id: division
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-                
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'サンプリングレート'
-                    TextInput:
-                        id: sample_rate
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-                
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'ビット深度'
-                    TextInput:
-                        id: bit_depth
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-                
-                BoxLayout:
-                    Label:
-                        font_name: 'ipamp.ttf'
-                        text: 'クロック遅延'
-                    TextInput:
-                        id: clock_delay
-                        size: 200, 30
-                        pos: 50, 70
-                        line_height: 1
-                        multiline: False
-                        hint_text: 'test'
-
-            FloatLayout:
-                size_hint_x: 0.33
-                canvas:
-                    Color: 
-                        rgba: 1, 1, 1, 1
-                    Rectangle:
-                        source: "flower3.5.png"
-                        pos: self.pos
-                        size: self.size
-        
-        BoxLayout:
-            size_hint_y: 0.5
-        
-        BoxLayout:
-            size_hint_y: 1.75
-
-            Button:
-                font_name: 'ipamp.ttf'
-                text: 'メニューに戻る'
-                on_press: root.manager.current = 'menu'
-
-            Button:
-                font_name: 'ipamp.ttf'
-                text: 'テスト再生'
-                on_press: pass
-
-            Button:
-                font_name: 'ipamp.ttf'
-                text: 'WAV→MIDI変換する'
-                on_press: pass

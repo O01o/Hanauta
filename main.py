@@ -134,6 +134,7 @@ class WavListScreen(Screen):
     flag2 = True
     filetext = StringProperty()
     playtext = StringProperty()
+    converttext = StringProperty()
     hop_length = NumericProperty() # 1フレーム出力あたりに必要なサンプル量
     disabled = BooleanProperty()
     # tempo_list = [30, 36, 40, 45, 50, 60, 72, 75, 90, 100, 120, 125, 150, 180, 200, 225, 300]
@@ -142,6 +143,7 @@ class WavListScreen(Screen):
     
     color = ListProperty([0.5, 0.5, 0.5, 1.0])
     color2 = ListProperty([0.5, 0.5, 0.5, 1.0])
+    color3 = ListProperty([0.5, 0.5, 0.5, 1.0])
 
     sound = SoundLoader.load('')
     tik = SoundLoader.load('clock_cut.wav')
@@ -150,6 +152,7 @@ class WavListScreen(Screen):
         super(WavListScreen, self).__init__(**kwargs)
         self.filetext = 'wavfile?'
         self.playtext = 'play'
+        self.converttext = 'WAV2MIDI変換'
         self.hop_length = 16 * self.tempo_index
         self.tempo = round(abs(SAMPLE_RATE * 15 / self.hop_length), 2)
         self.disabled = False
@@ -212,15 +215,14 @@ class WavListScreen(Screen):
             '''
             Convert Wave to Chromagram with Librosa
             '''
-            # audiofile = wave.open('wavfiles/asano.wav', 'rb')
-            # y, sr = librosa.load('wavfiles/asano.wav', sr=SAMPLE_RATE)
-            audiofile = wave.open(self.filetext, 'rb')
-            y, sr = librosa.load(self.filetext, sr=SAMPLE_RATE)
+            # 変換中はボタンの色とテキストを変換させておく
+            self.converttext = '変換中'
+            self.color3 = [0.3, 1.0, 0.3, 1.0]
             
-            print('fr: ', audiofile.getframerate(), 'sr: ', sr)
+            y, sr = librosa.load(self.filetext, sr=SAMPLE_RATE)
+            # 各パラメータの値の設定
             # hop_length は5オクターブの場合だと16の整数倍である必要があるらしいです！
             hop_length = self.hop_length # CQTのサンプル数(ここがクロックの速さに応じて可変になる)(デフォルト値は512)(計算方法は紙の計算式にて)           
-            # hop_length = 2048 # CQTのサンプル数(ここがクロックの速さに応じて可変になる)(デフォルト値は512)(計算方法は紙の計算式にて)           
             fmin = librosa.note_to_hz('C1') # 最低音階
             bins_per_octave = 12 # 1オクターブ12音階
             octaves = 5 # オクターブ数
@@ -242,7 +244,6 @@ class WavListScreen(Screen):
             midi_list = [] # 音階の長さリスト
             tmp_pitch = 0 # 一時的に保存する音階
             count = 1 # 音階の長さ
-            print('loaded soundfile sample rate: ', sr)
             # print(len(y))
             # print(len(audiofile.readframes))
             print(type(chroma_cqt), len(chroma_cqt))
@@ -285,6 +286,10 @@ class WavListScreen(Screen):
                 track.append(Message('note_off', note=note[0]+36, time=120*note[1]))
 
             mid.save(self.filetext+'.mid') # 元の音声ファイル名+.mid
+            
+            # 変換後にボタンの色とテキストを元に戻しておく
+            self.converttext = 'WAV2MIDI変換'
+            self.color3 = [0.5, 0.5, 0.5, 1.0]
             
         else:
             self.playtext = 'file not found...'
