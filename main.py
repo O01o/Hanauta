@@ -233,19 +233,16 @@ class WavListScreen(Screen):
             chroma_cqt = np.abs(librosa.cqt(
                 y, sr=sr, hop_length=hop_length, fmin=fmin, n_bins=n_bins, 
                 bins_per_octave=bins_per_octave, window=window))
-        
-            '''
-            chroma_cqt = np.abs(librosa.cqt(
-                audiofile.readframes, sr=audiofile.getframerate, hop_length=hop_length, fmin=fmin, n_bins=n_bins, 
-                bins_per_octave=bins_per_octave, window=window))
-            '''
+            
+            # 歯擦音の軽減をするために最後のオクターブを10dBほど軽減する
+            # (アンプの状態では0.3倍するだけでおおよそ近くなる)
+            for num in range(n_bins - (2*bins_per_octave), n_bins):
+                chroma_cqt[num] *= 0.3
             
             pitch_list = [] # 各フレームごとの音階
             midi_list = [] # 音階の長さリスト
             tmp_pitch = 0 # 一時的に保存する音階
             count = 1 # 音階の長さ
-            # print(len(y))
-            # print(len(audiofile.readframes))
             print(type(chroma_cqt), len(chroma_cqt))
             chroma_cqt_T = chroma_cqt.T
             for x in chroma_cqt_T:
