@@ -139,7 +139,28 @@ class WavListScreen(Screen):
     disabled = BooleanProperty()
     # tempo_list = [30, 36, 40, 45, 50, 60, 72, 75, 90, 100, 120, 125, 150, 180, 200, 225, 300]
     tempo = NumericProperty() # 音のテンポ
+    # tempo_index = NumericProperty(64) # old: 100
     tempo_index = NumericProperty(100)
+    # 30 < tempo < 250
+    # x0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+    tempo_index_list = np.array([
+        # 0,   1,   2,   3,   4,   5,   6,   7,   8,   9
+        250,242, 234, 227, 221, 214, 208, 203, 197, 192,
+        188, 183, 179, 174, 170, 167, 163, 160, 156, 153,
+        150, 147, 144, 142, 139, 136, 134, 132, 129, 127,
+        125, 123, 121, 119, 117, 115, 114, 112, 110, 109,
+        
+        107, 105, 103, 101,100,98,97,96,95,
+        94,93,92,91,90,89,87,86,85,84,83,82,81,80,
+        79,78,77,76,75,74,73,72,71,70,
+        69,68,67,66,65,64,63,62,61,60,
+        59,58,57,56,55,54,53,52,51,50,
+        49,48,47,46,45,44,43,42,41,40,
+        39,38,37,36,35,34,33,32,31,30
+    ])
+    print("tempos_index_list length:", len(tempo_index_list))
+    print("index list type:", type(tempo_index_list[40]))
+    print(type(hop_length))
     
     color = ListProperty([0.5, 0.5, 0.5, 1.0])
     color2 = ListProperty([0.5, 0.5, 0.5, 1.0])
@@ -153,11 +174,12 @@ class WavListScreen(Screen):
         self.filetext = 'wavfile?'
         self.playtext = 'play'
         self.converttext = 'WAV2MIDI変換'
+        # self.hop_length = 16 * self.tempo_index_list[self.tempo_index]
         self.hop_length = 16 * self.tempo_index
         self.tempo = round(abs(SAMPLE_RATE * 15 / self.hop_length), 2)
         self.disabled = False
         
-        print(type(self.hop_length))
+        
 
     def selected(self, filename):
         try:
@@ -168,8 +190,11 @@ class WavListScreen(Screen):
     
     def onClickPlusMinusButton(self, num):          
         self.tempo_index -= num
+        # self.hop_length = 16 * self.tempo_index_list[self.tempo_index]
         self.hop_length = 16 * self.tempo_index
         self.tempo = round(abs(SAMPLE_RATE * 15 / self.hop_length), 2)
+        # print(self.tempo_index, self.tempo_index_list[self.tempo], self.tempo)
+        print(self.tempo_index, self.tempo_index_list[self.tempo_index], self.tempo)
 
     def onClickPlayButton(self):
         print('PlayToggle Changed to', self.flag,'!')
